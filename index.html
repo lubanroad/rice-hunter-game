@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <title>知己知米 - 接米粒遊戲</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #4A90E2;
+            --color-primary-dark: #2E5C8A;
+            --color-success: #90EE90;
+            --color-success-dark: #7FD87F;
+            --color-accent: #FF6B9D;
+            --color-gold: #fde54c;
+            --color-text: #2C3E50;
+            --color-border: #1b1b1b;
+            --color-light: #E8F5E9;
+            --color-white: #FFFFFF;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-medium: 0 4px 12px rgba(74, 144, 226, 0.2);
+            --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans JP', 'Microsoft JhengHei', 'PingFang SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #bfdcf2 0%, #7FA8C8 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--color-text);
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .container {
+            background: var(--color-white);
+            border: 3px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-heavy);
+            padding: 28px;
+            max-width: 560px;
+            width: 100%;
+            animation: slideInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes slideInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* 頂部區域 */
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            border-bottom: 3px solid var(--color-border);
+            padding-bottom: 18px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 52px;
+            line-height: 1;
+        }
+
+        .brand-name {
+            font-size: 32px;
+            font-weight: 900;
+            color: #2C3E50;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .brand-tagline {
+            font-size: 13px;
+            color: #2C3E50;
+            opacity: 0.85;
+            margin-top: 6px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: var(--color-text);
+            opacity: 0.7;
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        /* 資訊提示框 */
+        .info-box {
+            background: linear-gradient(135deg, #FFFDF0 0%, #FFFBEB 100%);
+            border: none;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            color: var(--color-text);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 12px rgba(255, 215, 0, 0.15);
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            font-family: 'Noto Sans JP', 'Microsoft JhengHei', 'PingFang SC', sans-serif;
+            font-style: italic;
+        }
+
+        .info-box::before {
+            content: '✨';
+            font-size: 16px;
+            display: inline-block;
+        }
+
+        /* 遊戲區域 */
+        .game-area {
+            position: relative;
+            width: 100%;
+            height: 420px;
+            background: linear-gradient(to bottom, #A8D8BA 0%, #7FBF9F 100%);
+            border: 3px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 20px;
+            cursor: grab;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05), var(--shadow-light);
+        }
+
+        .game-area.active { cursor: grabbing; }
+
+        .game-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(144, 238, 144, 0.08) 40px, rgba(144, 238, 144, 0.08) 80px),
+                repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(144, 238, 144, 0.08) 40px, rgba(144, 238, 144, 0.08) 80px);
+            pointer-events: none;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 計時進度條 - 右側垂直 */
+        .progress-area {
+            position: absolute;
+            right: 12px;
+            top: 12px;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 10px;
+            border-radius: 20px;
+            border: 2px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            width: 6px;
+            height: 200px;
+            background: #E0E0E0;
+            border-radius: 3px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        .progress-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #b6f77c 0%, #fde54c 50%, #f28bc7 100%);
+            border-radius: 3px;
+            transition: height 0.1s linear;
+        }
+
+        .timer {
+            color: var(--color-primary);
+            font-weight: 900;
+            font-size: 16px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        /* 統計區 */
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-box {
+            background: var(--color-white);
+            border: 2px solid var(--color-border);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--color-text);
+            opacity: 0.7;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--color-primary);
+        }
+
+        /* 按鈕區 */
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 24px;
+            border: 3px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-height: 48px;
+            letter-spacing: 0.5px;
+            font-family: 'Noto Sans JP', 'Microsoft JhengHei', sans-serif;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
+            color: var(--color-text);
+        }
+
+        .btn-play:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-play:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .btn-play:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-leaderboard {
+            background: var(--color-white);
+            color: var(--color-primary);
+        }
+
+        .btn-leaderboard:hover {
+            background: var(--color-light);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* Modal 樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal.show { display: flex; }
+
+        .modal-content {
+            background: var(--color-white);
+            padding: 28px;
+            border-radius: var(--radius-lg);
+            border: 3px solid var(--color-border);
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        @keyframes bounceIn {
+            0% { transform: translateY(30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: all 0.2s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--color-accent);
+            transform: rotate(90deg);
+        }
+
+        /* 結果卡片 */
+        .result-title {
+            font-size: 28px;
+            font-weight: 900;
+            margin-top: 8px;
+            margin-bottom: 20px;
+            color: var(--color-primary);
+            clear: both;
+            letter-spacing: 1px;
+        }
+
+        .result-coin {
+            font-size: 64px;
+            font-weight: 900;
+            color: var(--color-gold);
+            margin: 16px 0;
+            text-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+            animation: bounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .result-coupon {
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFF5CC 100%);
+            border: 2px solid var(--color-gold);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+            box-shadow: var(--shadow-light);
+        }
+
+        .coupon-rate {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--color-accent);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .coupon-detail {
+            font-size: 12px;
+            color: var(--color-text);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .coupon-code {
+            background: var(--color-white);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-family: 'Roboto Mono', monospace;
+            font-size: 16px;
+            font-weight: 900;
+            margin-top: 12px;
+            letter-spacing: 2px;
+            word-break: break-all;
+            color: var(--color-primary);
+            border: 2px solid var(--color-border);
+        }
+
+        .result-notes {
+            font-size: 12px;
+            color: var(--color-text);
+            opacity: 0.7;
+            margin-top: 16px;
+            line-height: 1.8;
+            font-weight: 500;
+        }
+
+        .result-notes > div {
+            margin-bottom: 4px;
+        }
+
+        .result-notes::before,
+        .result-notes > div::before {
+            content: '✓';
+            color: var(--color-success);
+            font-weight: 900;
+            margin-right: 6px;
+        }
+
+        /* 排行榜 */
+        .leaderboard {
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .leaderboard::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .leaderboard::-webkit-scrollbar-track {
+            background: var(--color-light);
+            border-radius: 3px;
+        }
+
+        .leaderboard::-webkit-scrollbar-thumb {
+            background: var(--color-success);
+            border-radius: 3px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #E0E0E0;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        .leaderboard-item:hover {
+            background: var(--color-light);
+            transform: translateX(4px);
+        }
+
+        .leaderboard-rank {
+            font-weight: 900;
+            min-width: 40px;
+            color: var(--color-text);
+        }
+
+        .leaderboard-rank.top1 {
+            color: var(--color-gold);
+            font-size: 18px;
+        }
+
+        .leaderboard-rank.top2 {
+            color: #C0C0C0;
+        }
+
+        .leaderboard-rank.top3 {
+            color: #CD7F32;
+        }
+
+        .leaderboard-name {
+            flex: 1;
+            margin-left: 12px;
+            color: var(--color-text);
+            font-weight: 600;
+        }
+
+        .leaderboard-score {
+            font-weight: 900;
+            color: var(--color-primary);
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .leaderboard-time {
+            font-size: 12px;
+            color: var(--color-text);
+            opacity: 0.6;
+            margin-left: 8px;
+        }
+
+        /* Toast 動畫 */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+            to {
+                opacity: 0;
+                transform: translate(-50%, -60px);
+            }
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            .brand-name {
+                font-size: 26px;
+            }
+
+            .game-area {
+                height: 320px;
+            }
+
+            .btn {
+                font-size: 14px;
+                padding: 12px 16px;
+            }
+
+            .result-coin {
+                font-size: 48px;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 頂部標題 -->
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo">
+                    🎮
+                </div>
+                <div>
+                    <div class="brand-name">粒粒獵人</div>
+                </div>
+            </div>
+            <div class="subtitle">接米粒 賺折價券 粒粒皆辛苦</div>
+        </div>
+
+        <!-- 資訊提示 -->
+        <div class="info-box">每日限一次｜粒粒皆辛苦，折扣更划算</div>
+
+        <!-- 遊戲區域 -->
+        <div class="game-area" id="gameArea">
+            <canvas id="gameCanvas"></canvas>
+            <div class="progress-area" style="display: none;" id="progressArea">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="timer" id="timer">30s</div>
+            </div>
+        </div>
+
+        <!-- 統計資訊 -->
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">今日米粒</div>
+                <div class="stat-value" id="todayCoin">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">目前排名</div>
+                <div class="stat-value" id="ranking">-</div>
+            </div>
+        </div>
+
+        <!-- 按鈕組 -->
+        <div class="buttons">
+            <button class="btn btn-play" id="playBtn">▶ 開始遊戲</button>
+            <button class="btn btn-leaderboard" id="leaderboardBtn">📊 排行榜</button>
+        </div>
+    </div>
+
+    <!-- 結果 Modal -->
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeResultModal()">&times;</span>
+            <div class="result-title">🎉 遊戲完成</div>
+            <div class="result-coin" id="finalCoin">0</div>
+            <div class="result-coupon">
+                <div class="coupon-rate" id="couponRate">🎁 iChef 折價券</div>
+                <div class="coupon-detail">滿額門檻：<strong id="minOrder">$0</strong></div>
+                <div class="coupon-detail">現折：<strong id="maxDiscount">$0</strong></div>
+                <div style="position: relative;">
+                    <div class="coupon-code" id="couponCode" style="cursor: pointer; user-select: all;">領取中…</div>
+                    <button onclick="copyCouponCode()" style="
+                        position: absolute;
+                        right: 8px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        background: #90EE90;
+                        border: 2px solid #2C3E50;
+                        color: #2C3E50;
+                        padding: 4px 12px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        font-size: 12px;
+                        transition: all 0.2s;
+                    " onmouseover="this.style.transform='translateY(-50%) scale(1.05)'" onmouseout="this.style.transform='translateY(-50%) scale(1)'">
+                        📋 複製
+                    </button>
+                </div>
+            </div>
+            <div class="result-notes" id="resultNotes">
+                <div>結帳時於 iChef 線上點餐輸入折扣碼</div>
+            </div>
+            <button class="btn btn-play" onclick="goOrder()" style="margin-top: 20px; width: 100%;">🍱 立即訂餐</button>
+            <button class="btn btn-leaderboard" onclick="shareScore()" style="margin-top: 10px; width: 100%;">📣 分享我的分數</button>
+            <button class="btn" onclick="closeResultModal()" style="margin-top: 10px; width: 100%; background: transparent; border: none; color: #999;">關閉</button>
+        </div>
+    </div>
+
+    <!-- 排行榜 Modal -->
+    <div class="modal" id="leaderboardModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeLeaderboardModal()">&times;</span>
+            <div class="result-title">📊 今日排行榜</div>
+            <div class="leaderboard" id="leaderboardList">
+                <div style="padding: 20px; text-align: center; color: #999;">載入中...</div>
+            </div>
+            <button class="btn btn-play" onclick="closeLeaderboardModal()" style="margin-top: 20px; width: 100%;">關閉</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const progressArea = document.getElementById('progressArea');
+        const progressFill = document.getElementById('progressFill');
+        const timer = document.getElementById('timer');
+
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // ===== 設定（2026-10-23）=====
+        const CONFIG = {
+            LIFF_ID: 'LIFF_ID_待填',   // ⏳ LINE Developers 建好 LIFF App 後填入
+            API_URL: 'https://since9134.app.n8n.cloud/webhook/zmzm-game-result',
+            ORDER_URL: 'https://shop.ichefpos.com/store/j3LVSING/ordering',
+            MAX_SCORE: 500,
+        };
+        // 分級：1–100 滿1000折50 … 401–500 滿5000折250（實際折扣碼由伺服器回傳）
+        function tierOf(s) { return Math.min(5, Math.max(1, Math.ceil(s / 100))); }
+
+        // 身分改由 LIFF 取得（不再用網址參數，避免偽造）
+        let liffReady = false;
+        async function initLiff() {
+            try {
+                await liff.init({ liffId: CONFIG.LIFF_ID });
+                if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+                liffReady = true;
+            } catch (e) {
+                console.warn('LIFF 初始化失敗：', e);
+            }
+        }
+        initLiff();
+
+        let gameRunning = false;
+        let coins = [];
+        let basket = { x: 0, y: 0, width: 80, height: 35, speed: 8 };
+        let score = 0;
+        let coinsCaught = 0;
+        let startTime = 0;
+        const GAME_DURATION = 30000;
+
+        class Coin {
+            constructor() {
+                this.x = Math.random() * (canvas.width - 30);
+                this.y = -30;
+                this.width = 30;
+                this.height = 30;
+                this.speed = 2 + Math.random() * 3;
+                this.value = Math.random() < 0.7 ? 1 : (Math.random() < 0.8 ? 5 : 10);
+                this.rotation = 0;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x + 15, this.y + 15);
+                ctx.rotate(this.rotation);
+
+                // 米粒形狀（白色橢圓）
+                ctx.fillStyle = '#FFFFFF';
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 2.2;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 8, 14, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // 米粒紋理（中間凹線）
+                ctx.strokeStyle = '#FFE5B4';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, -10);
+                ctx.lineTo(0, 10);
+                ctx.stroke();
+
+                // 米粒數字（金色）
+                ctx.fillStyle = '#FFD700';
+                ctx.font = 'bold 9px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.value, 0, 0);
+
+                ctx.restore();
+            }
+
+            update() {
+                this.y += this.speed;
+                this.rotation += 0.1;
+            }
+
+            isOffScreen() {
+                return this.y > canvas.height;
+            }
+        }
+
+        // 鼠標/觸摸控制
+        document.addEventListener('mousemove', (e) => {
+            if (!gameRunning) return;
+            const rect = canvas.getBoundingClientRect();
+            basket.x = Math.max(0, Math.min(canvas.width - basket.width, e.clientX - rect.left - basket.width / 2));
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (!gameRunning) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            basket.x = Math.max(0, Math.min(canvas.width - basket.width, e.touches[0].clientX - rect.left - basket.width / 2));
+        });
+
+        function drawBasket() {
+            basket.y = canvas.height - 45;
+            const x = basket.x;
+            const y = basket.y;
+            const w = basket.width;
+            const h = 35;
+
+            // 便當盒主體
+            ctx.fillStyle = '#90EE90';
+            ctx.strokeStyle = '#2C3E50';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.rect(x, y, w, h);
+            ctx.fill();
+            ctx.stroke();
+
+            // 分隔線
+            ctx.strokeStyle = '#7FD87F';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x + w / 3, y + 8);
+            ctx.lineTo(x + w / 3, y + h);
+            ctx.moveTo(x + (w * 2) / 3, y + 8);
+            ctx.lineTo(x + (w * 2) / 3, y + h);
+            ctx.stroke();
+
+            // Logo：便當盒上的米字標誌
+            ctx.fillStyle = '#FFB84D';
+            ctx.font = 'bold 9px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('米', x + w / 6, y + 4);
+            ctx.fillText('米', x + w / 2, y + 4);
+            ctx.fillText('米', x + (w * 5) / 6, y + 4);
+        }
+
+        function checkCollision(coin) {
+            return coin.x < basket.x + basket.width &&
+                   coin.x + coin.width > basket.x &&
+                   coin.y + coin.height > basket.y &&
+                   coin.y < basket.y + basket.height;
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const elapsed = Date.now() - startTime;
+            const remaining = Math.max(0, GAME_DURATION - elapsed);
+            const progress = (1 - remaining / GAME_DURATION) * 100;
+
+            progressFill.style.width = progress + '%';
+            timer.textContent = Math.ceil(remaining / 1000) + 's';
+
+            if (Math.random() < 0.05) {
+                coins.push(new Coin());
+            }
+
+            for (let i = coins.length - 1; i >= 0; i--) {
+                coins[i].update();
+                coins[i].draw();
+
+                if (checkCollision(coins[i])) {
+                    const coin = coins[i];
+                    score += coin.value;
+                    coinsCaught++;
+                    createFloatingText(coin.x, coin.y, '+' + coin.value);
+                    coins.splice(i, 1);
+                    playSound();
+                } else if (coins[i].isOffScreen()) {
+                    coins.splice(i, 1);
+                }
+            }
+
+            drawFloatingTexts();
+            drawBasket();
+
+            ctx.fillStyle = '#2C3E50';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('🌾 ' + score, 15, 30);
+
+            if (remaining > 0) {
+                requestAnimationFrame(gameLoop);
+            } else {
+                endGame();
+            }
+        }
+
+        let floatingTexts = [];
+        let audioContext = null;
+
+        function createFloatingText(x, y, text) {
+            floatingTexts.push({
+                x: x,
+                y: y,
+                text: text,
+                opacity: 1,
+                life: 1000
+            });
+        }
+
+        function drawFloatingTexts() {
+            floatingTexts = floatingTexts.filter(ft => ft.life > 0);
+            floatingTexts.forEach(ft => {
+                ft.y -= 1;
+                ft.life -= 16;
+                ft.opacity = ft.life / 1000;
+
+                ctx.save();
+                ctx.globalAlpha = ft.opacity;
+                ctx.fillStyle = '#FFD700';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(ft.text, ft.x, ft.y);
+                ctx.restore();
+            });
+        }
+
+        function playSound() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        function startGame() {
+            gameRunning = true;
+            coins = [];
+            floatingTexts = [];
+            score = 0;
+            coinsCaught = 0;
+            startTime = Date.now();
+            basket.x = canvas.width / 2 - basket.width / 2;
+
+            document.getElementById('playBtn').disabled = true;
+            progressArea.style.display = 'flex';
+            document.getElementById('todayCoin').textContent = '0';
+
+            gameLoop();
+        }
+
+        function endGame() {
+            gameRunning = false;
+            progressArea.style.display = 'none';
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('todayCoin').textContent = score;
+
+            const finalScore = Math.min(score, CONFIG.MAX_SCORE);
+            const tier = tierOf(finalScore);
+            const minOrder = tier * 1000;
+            const maxDiscount = tier * 50;
+
+            document.getElementById('finalCoin').textContent = finalScore;
+            document.getElementById('couponRate').textContent = '🎁 $' + maxDiscount + ' iChef 折價券';
+            document.getElementById('minOrder').textContent = '$' + minOrder;
+            document.getElementById('maxDiscount').textContent = '$' + maxDiscount;
+            document.getElementById('couponCode').textContent = '領取中…';
+
+            const gameRecord = {
+                date: new Date().toISOString().split('T')[0],
+                score: finalScore,
+                minOrder: minOrder,
+                maxDiscount: maxDiscount,
+                coinsCaught: coinsCaught
+            };
+            localStorage.setItem('lastGameResult', JSON.stringify(gameRecord));
+            window.lastGameRecord = gameRecord;
+
+            if (finalScore < 1) {
+                document.getElementById('couponCode').textContent = '沒接到米粒';
+                setNote('至少接到 1 粒米才能領券，再試一次！');
+            } else {
+                recordGameToServer(finalScore, gameRecord);
+            }
+
+            updateLeaderboard(score);
+            document.getElementById('resultModal').classList.add('show');
+        }
+
+        function setNote(text, ok) {
+            const notes = document.getElementById('resultNotes');
+            notes.innerHTML = '';
+            const d = document.createElement('div');
+            d.textContent = text;
+            if (ok) d.style.cssText = 'color: #2E7D32; font-weight: bold;';
+            notes.appendChild(d);
+        }
+
+        async function recordGameToServer(finalScore, gameRecord) {
+            if (!liffReady) {
+                document.getElementById('couponCode').textContent = '請從 LINE 開啟';
+                setNote('請透過知己知米 LINE 官方帳號開啟遊戲，才能領取折價券');
+                return;
+            }
+            try {
+                const response = await fetch(CONFIG.API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idToken: liff.getIDToken(), score: finalScore })
+                });
+                const data = await response.json().catch(() => ({}));
+
+                if (response.ok && data.status === 'ok') {
+                    document.getElementById('couponCode').textContent = data.code;
+                    document.getElementById('minOrder').textContent = '$' + data.minOrder;
+                    document.getElementById('maxDiscount').textContent = '$' + data.discount;
+                    setNote('✅ 折價券已傳送至 LINE，結帳時輸入折扣碼即可使用', true);
+                    gameRecord.couponCode = data.code;
+                    localStorage.setItem('lastGameResult', JSON.stringify(gameRecord));
+                } else if (data.status === 'already_claimed') {
+                    document.getElementById('couponCode').textContent = '今日已領取';
+                    setNote('每人每天限領一張，今天的折價券已經傳到你的 LINE 囉，明天再來挑戰！');
+                } else if (data.status === 'invalid_token') {
+                    document.getElementById('couponCode').textContent = '請重新開啟';
+                    setNote('登入已逾時，請關閉後從 LINE 重新開啟遊戲');
+                } else {
+                    document.getElementById('couponCode').textContent = '暫時無法領取';
+                    setNote('系統忙碌中，請稍後再試，或私訊知己知米 LINE 官方帳號');
+                }
+            } catch (error) {
+                console.warn('連線失敗：', error);
+                document.getElementById('couponCode').textContent = '暫時無法領取';
+                setNote('網路連線不穩，請稍後再試');
+            }
+        }
+
+        function goOrder() {
+            if (liffReady && liff.isInClient()) {
+                liff.openWindow({ url: CONFIG.ORDER_URL, external: false });
+            } else {
+                window.open(CONFIG.ORDER_URL, '_blank');
+            }
+        }
+
+        function shareScore() {
+            const rec = window.lastGameRecord || JSON.parse(localStorage.getItem('lastGameResult') || 'null');
+            if (!rec) { showToast('先玩一局再分享吧！'); return; }
+            const gameLink = 'https://liff.line.me/' + CONFIG.LIFF_ID;
+            const text = '🌾 我在「粒粒獵人」接到 ' + rec.score + ' 粒米，拿到知己知米 $' + rec.maxDiscount + ' 折價券！你能超過我嗎？\n' + gameLink;
+            const url = 'https://line.me/R/share?text=' + encodeURIComponent(text);
+            if (liffReady && liff.isInClient()) {
+                liff.openWindow({ url: url, external: false });
+            } else {
+                window.open(url, '_blank');
+            }
+        }
+
+        function updateLeaderboard(newScore) {
+            let leaderboard = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+            leaderboard.push({
+                name: '玩家 #' + Math.floor(Math.random() * 10000),
+                score: newScore,
+                time: new Date().toLocaleTimeString('zh-TW')
+            });
+            leaderboard.sort((a, b) => b.score - a.score);
+            leaderboard = leaderboard.slice(0, 10);
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+        }
+
+        function showLeaderboard() {
+            let leaderboard = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+            const list = document.getElementById('leaderboardList');
+
+            if (leaderboard.length === 0) {
+                list.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">暫無排行數據</div>';
+            } else {
+                list.innerHTML = leaderboard.map((item, idx) => {
+                    const medals = ['🥇', '🥈', '🥉'];
+                    const medal = medals[idx] || '';
+                    return `
+                        <div class="leaderboard-item">
+                            <span class="leaderboard-rank${idx < 3 ? ' top' + (idx + 1) : ''}">${medal}${idx + 1}</span>
+                            <span class="leaderboard-name">${item.name}</span>
+                            <span class="leaderboard-score">${item.score}</span>
+                            <span class="leaderboard-time">${item.time}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('leaderboardModal').classList.add('show');
+        }
+
+        function closeResultModal() {
+            document.getElementById('resultModal').classList.remove('show');
+        }
+
+        function closeLeaderboardModal() {
+            document.getElementById('leaderboardModal').classList.remove('show');
+        }
+
+        function copyCouponCode() {
+            const couponCode = document.getElementById('couponCode').textContent;
+            if (!couponCode || !/^[A-Z0-9]{4,}$/.test(couponCode)) {
+                showToast('⚠️ 折扣碼還未生成');
+                return;
+            }
+
+            navigator.clipboard.writeText(couponCode).then(() => {
+                showToast('✅ 已複製折扣碼');
+            }).catch(() => {
+                // 備用方案：手動複製
+                const textarea = document.createElement('textarea');
+                textarea.value = couponCode;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('✅ 已複製折扣碼');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #2C3E50;
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                font-weight: bold;
+                z-index: 2000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                animation: slideDown 0.3s ease;
+            `;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideUp 0.3s ease';
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 1500);
+        }
+
+        document.getElementById('playBtn').addEventListener('click', startGame);
+        document.getElementById('leaderboardBtn').addEventListener('click', showLeaderboard);
+
+        const lastResult = JSON.parse(localStorage.getItem('lastGameResult') || 'null');
+        if (lastResult) {
+            document.getElementById('todayCoin').textContent = lastResult.score;
+            if (lastResult.couponCode) {
+                document.getElementById('couponCode').textContent = lastResult.couponCode;
+            }
+        }
+    </script>
+</body>
+</html>
+</body></html>

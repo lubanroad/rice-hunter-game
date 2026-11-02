@@ -707,6 +707,12 @@
             return null;
         }
         const WEEK = ['日', '一', '二', '三', '四', '五', '六'];
+        function nextOpenText() {
+            const n = nextOpenDay();
+            if (!n) return '';
+            const nl = openLabel(n);
+            return ' 下次送券：' + n.m + '/' + n.day + '（' + WEEK[n.dow] + '）' + (nl !== '週一限定' ? nl : '');
+        }
         let openToday = false;
         function applyOpenState() {
             const today = twDate(0);
@@ -721,24 +727,40 @@
                 btn.disabled = gameRunning;
                 btn.textContent = '▶ 開始遊戲';
             } else {
-                const n = nextOpenDay();
-                const nl = n ? openLabel(n) : '';
-                info.textContent = '🌾 週一限定開放｜解除你的週一憂鬱！' + (n ? ' 下次開放：' + n.m + '/' + n.day + '（' + WEEK[n.dow] + '）' + (nl !== '週一限定' ? nl : '') : '');
-                btn.disabled = true;
-                btn.textContent = n ? '⏳ ' + n.m + '/' + n.day + '（' + WEEK[n.dow] + '）開放' : '⏳ 尚未開放';
+                info.textContent = '🌾 今天是練習模式｜週一限定送券，解除你的週一憂鬱！' + nextOpenText();
+                btn.disabled = gameRunning;
+                btn.textContent = '▶ 練習玩';
             }
         }
 
         // 身分改由 LIFF 取得（不再用網址參數，避免偽造）
-        let liffReady = false;
+        // 不強制登入：練習模式免登入，送券日領券時才登入 LINE；登入回來後自動補領
+        let liffReady = false;     // 已登入，可領券
+        let liffInited = false;    // SDK 初始化完成
         async function initLiff() {
             try {
                 await liff.init({ liffId: CONFIG.LIFF_ID });
-                if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
-                liffReady = true;
+                liffInited = true;
+                liffReady = liff.isLoggedIn();
+                if (liffReady) resumePendingClaim();
             } catch (e) {
                 console.warn('LIFF 初始化失敗：', e);
             }
+        }
+        function resumePendingClaim() {
+            let p = null;
+            try { p = JSON.parse(sessionStorage.getItem('pendingClaim') || 'null'); } catch (e) {}
+            sessionStorage.removeItem('pendingClaim');
+            if (!p || Date.now() - p.ts > 15 * 60 * 1000 || p.ymd !== twDate(0).ymd) return;
+            const rec = p.record;
+            window.lastGameRecord = rec;
+            document.getElementById('finalCoin').textContent = rec.score;
+            document.getElementById('couponRate').textContent = '🎁 $' + rec.maxDiscount + ' iChef 折價券';
+            document.getElementById('minOrder').textContent = '$' + rec.minOrder;
+            document.getElementById('maxDiscount').textContent = '$' + rec.maxDiscount;
+            document.getElementById('couponCode').textContent = '領取中…';
+            document.getElementById('resultModal').classList.add('show');
+            recordGameToServer(rec.score, rec);
         }
         initLiff();
 
@@ -957,7 +979,6 @@
 
         function startGame() {
             applyOpenState();
-            if (!openToday) { showToast('今天沒有開放喔，下次開放日再來！'); return; }
             gameRunning = true;
             coins = [];
             floatingTexts = [];
@@ -1000,7 +1021,14 @@
             localStorage.setItem('lastGameResult', JSON.stringify(gameRecord));
             window.lastGameRecord = gameRecord;
 
-            if (finalScore < 1) {
+            if (!openToday) {
+                gameRecord.practice = true;
+                document.getElementById('couponRate').textContent = '🎮 練習模式';
+                document.getElementById('minOrder').textContent = '—';
+                document.getElementById('maxDiscount').textContent = '—';
+                document.getElementById('couponCode').textContent = '練習模式';
+                setNote('今天是練習模式，不送折價券。' + nextOpenText() + '，記得回來挑戰！');
+            } else if (finalScore < 1) {
                 document.getElementById('couponCode').textContent = '沒接到米粒';
                 setNote('至少接到 1 粒米才能領券，再試一次！');
             } else {
@@ -1022,8 +1050,15 @@
 
         async function recordGameToServer(finalScore, gameRecord) {
             if (!liffReady) {
-                document.getElementById('couponCode').textContent = '請從 LINE 開啟';
-                setNote('請透過知己知米 LINE 官方帳號開啟遊戲，才能領取折價券');
+                if (liffInited) {
+                    sessionStorage.setItem('pendingClaim', JSON.stringify({ ts: Date.now(), ymd: twDate(0).ymd, record: gameRecord }));
+                    document.getElementById('couponCode').textContent = '前往登入…';
+                    setNote('領券需要 LINE 登入，登入後會自動把折價券傳到你的 LINE');
+                    setTimeout(() => liff.login({ redirectUri: location.href.split('#')[0] }), 1500);
+                } else {
+                    document.getElementById('couponCode').textContent = '暫時無法領取';
+                    setNote('LINE 登入元件載入失敗，請重新整理頁面，或從知己知米 LINE 官方帳號開啟');
+                }
                 return;
             }
             try {
@@ -1072,8 +1107,10 @@
         function shareScore() {
             const rec = window.lastGameRecord || JSON.parse(localStorage.getItem('lastGameResult') || 'null');
             if (!rec) { showToast('先玩一局再分享吧！'); return; }
-            const gameLink = 'https://liff.line.me/' + CONFIG.LIFF_ID;
-            const text = '🌾 我在「粒粒獵人」接到 ' + rec.score + ' 粒米，拿到知己知米 $' + rec.maxDiscount + ' 折價券！你能超過我嗎？\n' + gameLink;
+            const gameLink = 'https://game.baofucompany.com/';
+            const text = rec.practice
+                ? '🌾 我在「粒粒獵人」接到 ' + rec.score + ' 粒米！週一來挑戰，玩就送知己知米折價券\n' + gameLink
+                : '🌾 我在「粒粒獵人」接到 ' + rec.score + ' 粒米，拿到知己知米 $' + rec.maxDiscount + ' 折價券！你能超過我嗎？\n' + gameLink;
             const url = 'https://line.me/R/share?text=' + encodeURIComponent(text);
             if (liffReady && liff.isInClient()) {
                 liff.openWindow({ url: url, external: false });

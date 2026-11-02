@@ -580,7 +580,7 @@
         </div>
 
         <!-- 資訊提示 -->
-        <div class="info-box">每日限一次｜粒粒皆辛苦，折扣更划算</div>
+        <div class="info-box" id="openInfo">週一限定｜解除你的週一憂鬱，粒粒皆辛苦，折扣更划算</div>
 
         <!-- 遊戲區域 -->
         <div class="game-area" id="gameArea">
@@ -687,6 +687,47 @@
         };
         // 分級：1–100 滿1000折50 … 401–500 滿5000折250（實際折扣碼由伺服器回傳）
         function tierOf(s) { return Math.min(5, Math.max(1, Math.ceil(s / 100))); }
+
+        // ===== 開放日：每週一＋特定節日（台北時間）=====
+        // 新增節日：在 SPECIAL_DAYS 加一行 'YYYY-MM-DD': '名稱'；n8n「檢查輸入」節點也要同步加
+        const SPECIAL_DAYS = {
+            '2026-11-11': '雙 11 限定',
+            '2026-11-26': '感恩節限定',
+            '2026-12-24': '平安夜限定',
+            '2026-12-25': '聖誕節限定',
+            '2027-01-01': '元旦好禮',
+        };
+        function twDate(offsetDays) {
+            const d = new Date(Date.now() + 8 * 3600e3 + (offsetDays || 0) * 864e5);
+            return { ymd: d.toISOString().slice(0, 10), dow: d.getUTCDay(), m: d.getUTCMonth() + 1, day: d.getUTCDate() };
+        }
+        function openLabel(t) { return SPECIAL_DAYS[t.ymd] || (t.dow === 1 ? '週一限定' : null); }
+        function nextOpenDay() {
+            for (let i = 1; i <= 14; i++) { const t = twDate(i); const l = openLabel(t); if (l) return t; }
+            return null;
+        }
+        const WEEK = ['日', '一', '二', '三', '四', '五', '六'];
+        let openToday = false;
+        function applyOpenState() {
+            const today = twDate(0);
+            const label = openLabel(today);
+            openToday = !!label;
+            const info = document.getElementById('openInfo');
+            const btn = document.getElementById('playBtn');
+            if (openToday) {
+                info.textContent = label === '週一限定'
+                    ? '🌾 週一限定開放｜解除你的週一憂鬱！今天玩就送折價券'
+                    : '🎁 ' + label + '｜今天特別開放，玩就送折價券';
+                btn.disabled = gameRunning;
+                btn.textContent = '▶ 開始遊戲';
+            } else {
+                const n = nextOpenDay();
+                const nl = n ? openLabel(n) : '';
+                info.textContent = '🌾 週一限定開放｜解除你的週一憂鬱！' + (n ? ' 下次開放：' + n.m + '/' + n.day + '（' + WEEK[n.dow] + '）' + (nl !== '週一限定' ? nl : '') : '');
+                btn.disabled = true;
+                btn.textContent = n ? '⏳ ' + n.m + '/' + n.day + '（' + WEEK[n.dow] + '）開放' : '⏳ 尚未開放';
+            }
+        }
 
         // 身分改由 LIFF 取得（不再用網址參數，避免偽造）
         let liffReady = false;
@@ -915,6 +956,8 @@
         }
 
         function startGame() {
+            applyOpenState();
+            if (!openToday) { showToast('今天沒有開放喔，下次開放日再來！'); return; }
             gameRunning = true;
             coins = [];
             floatingTexts = [];
@@ -933,7 +976,7 @@
         function endGame() {
             gameRunning = false;
             progressArea.style.display = 'none';
-            document.getElementById('playBtn').disabled = false;
+            applyOpenState();
             document.getElementById('todayCoin').textContent = score;
 
             const finalScore = Math.min(score, CONFIG.MAX_SCORE);
@@ -1001,6 +1044,9 @@
                 } else if (data.status === 'already_claimed') {
                     document.getElementById('couponCode').textContent = '今日已領取';
                     setNote('每人每天限領一張，今天的折價券已經傳到你的 LINE 囉，明天再來挑戰！');
+                } else if (data.status === 'closed') {
+                    document.getElementById('couponCode').textContent = '今天未開放';
+                    setNote('粒粒獵人每週一與特定節日開放領券，下次開放日再來挑戰！');
                 } else if (data.status === 'invalid_token') {
                     document.getElementById('couponCode').textContent = '請重新開啟';
                     setNote('登入已逾時，請關閉後從 LINE 重新開啟遊戲');
@@ -1127,6 +1173,8 @@
         }
 
         document.getElementById('playBtn').addEventListener('click', startGame);
+        applyOpenState();
+        setInterval(() => { if (!gameRunning) applyOpenState(); }, 60000);
         document.getElementById('leaderboardBtn').addEventListener('click', showLeaderboard);
 
         const lastResult = JSON.parse(localStorage.getItem('lastGameResult') || 'null');

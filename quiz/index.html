@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>今日便當運勢｜知己知米</title>
+<meta name="description" content="選星座、答 5 題，測出你的便當人格與今日運勢，再領一張知己知米折價券。">
+<meta property="og:title" content="今日便當運勢｜測出你的便當人格">
+<meta property="og:description" content="選星座＋5 題心理測驗，看看今天該吃什麼，還送知己知米折價券。">
+<meta property="og:url" content="https://game.baofucompany.com/quiz/">
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9CDCHS8M02"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9CDCHS8M02', { page_path: '/quiz/' });
+</script>
+<style>
+  :root {
+    --bg: #14110c;
+    --card: #1f1a12;
+    --gold: #d9b45a;
+    --gold-soft: #f3e3b5;
+    --text: #f6efe0;
+    --muted: #b9ad94;
+    --line: #3a3122;
+    --accent: #e8c56a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+  body { min-height: 100vh; display: flex; justify-content: center; padding: 16px 16px 40px; }
+  .wrap { width: 100%; max-width: 440px; }
+  header { text-align: center; padding: 18px 0 14px; }
+  .brand { font-size: 12px; letter-spacing: 4px; color: var(--gold); }
+  h1 { font-size: 26px; margin-top: 6px; color: var(--gold-soft); }
+  .sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px; margin-top: 14px; }
+  .progress { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-bottom: 16px; }
+  .progress > div { height: 100%; background: var(--gold); width: 0; transition: width .3s; }
+  .q-no { font-size: 12px; color: var(--gold); letter-spacing: 2px; }
+  .q-title { font-size: 20px; margin: 6px 0 16px; line-height: 1.4; }
+  .opts { display: grid; gap: 10px; }
+  .opts.grid3 { grid-template-columns: repeat(3, 1fr); }
+  .opt { background: #2a2318; border: 1px solid var(--line); color: var(--text); border-radius: 12px; padding: 14px 12px; font-size: 16px; text-align: left; cursor: pointer; transition: border-color .15s, background .15s; font-family: inherit; }
+  .opts.grid3 .opt { text-align: center; padding: 12px 6px; font-size: 14px; }
+  .opt small { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .opt:active, .opt:hover { border-color: var(--gold); background: #33291a; }
+  .btn { display: block; width: 100%; border: none; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; font-family: inherit; }
+  .btn:disabled { opacity: .6; cursor: default; }
+  .btn-gold { background: var(--gold); color: #1a140a; }
+  .btn-dark { background: #2a2318; color: var(--gold-soft); border: 1px solid var(--gold); }
+  .btn-ghost { background: transparent; color: var(--muted); font-weight: normal; }
+  .hidden { display: none !important; }
+  .result-emoji { font-size: 54px; text-align: center; }
+  .result-name { font-size: 26px; text-align: center; color: var(--gold-soft); margin-top: 6px; }
+  .result-desc { font-size: 15px; line-height: 1.7; color: var(--text); margin-top: 12px; }
+  .section-t { font-size: 13px; color: var(--gold); letter-spacing: 2px; margin: 18px 0 8px; }
+  .dish { background: #2a2318; border-radius: 10px; padding: 10px 12px; margin-top: 6px; font-size: 15px; }
+  .horo { font-size: 15px; line-height: 1.7; }
+  .lucky { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .chip { font-size: 12px; background: #2a2318; border: 1px solid var(--line); border-radius: 20px; padding: 4px 10px; color: var(--gold-soft); }
+  .coupon { margin-top: 16px; border: 1px dashed var(--gold); border-radius: 14px; padding: 14px; text-align: center; }
+  .coupon .c1 { font-size: 14px; color: var(--muted); }
+  .coupon .c2 { font-size: 20px; color: var(--gold-soft); margin: 4px 0; font-weight: bold; }
+  .coupon .code { font-size: 24px; letter-spacing: 3px; font-weight: bold; color: var(--accent); margin-top: 6px; user-select: all; }
+  .note { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.6; }
+  .note.ok { color: #9ee29e; }
+  .disclaimer { font-size: 11px; color: #7d735f; text-align: center; margin-top: 20px; line-height: 1.6; }
+  .share-modal { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
+  .share-modal img { max-width: 100%; max-height: 75vh; border-radius: 12px; }
+  .share-modal p { color: var(--gold-soft); font-size: 14px; margin: 12px 0; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">RICEANDME｜知己知米</div>
+    <h1>🔮 今日便當運勢</h1>
+    <div class="sub">選星座＋5 題，測出你的便當人格，還送折價券</div>
+  </header>
+
+  <!-- 開始 -->
+  <section id="start" class="card">
+    <div class="horo">午餐吃什麼，交給星星決定一下。<br>完成測驗就能領 <b style="color:var(--gold-soft)">滿 $1,000 折 $50</b> 折價券（每人每天 1 張）。</div>
+    <button class="btn btn-gold" id="startBtn">開始測驗</button>
+  </section>
+
+  <!-- 題目 -->
+  <section id="quiz" class="card hidden">
+    <div class="progress"><div id="bar"></div></div>
+    <div class="q-no" id="qno"></div>
+    <div class="q-title" id="qtitle"></div>
+    <div class="opts" id="opts"></div>
+  </section>
+
+  <!-- 結果 -->
+  <section id="result" class="card hidden">
+    <div class="result-emoji" id="rEmoji"></div>
+    <div class="result-name" id="rName"></div>
+    <div class="result-desc" id="rDesc"></div>
+
+    <div class="section-t">今日推薦</div>
+    <div id="rDishes"></div>
+
+    <div class="section-t" id="horoTitle">今日運勢</div>
+    <div class="horo" id="rHoro"></div>
+    <div class="lucky" id="rLucky"></div>
+
+    <div class="coupon">
+      <div class="c1">🎁 測驗限定 iChef 折價券</div>
+      <div class="c2">滿 $1,000 折 $50</div>
+      <div class="code" id="couponCode">—</div>
+      <div class="note" id="couponNote"></div>
+      <button class="btn btn-gold" id="claimBtn">領取折價券</button>
+    </div>
+
+    <button class="btn btn-gold" id="orderBtn">🍱 立即訂餐</button>
+    <button class="btn btn-dark hidden" id="teamBtn">🤝 企業團訂洽詢</button>
+    <button class="btn btn-dark" id="shareBtn">📸 分享我的便當人格</button>
+    <button class="btn btn-ghost" id="againBtn">再測一次</button>
+  </section>
+
+  <div class="disclaimer">星座運勢與心理測驗內容僅供娛樂參考。<br>折價券限知己知米 iChef 線上點餐（外帶／外送）使用，每人每天限領 1 張（與粒粒獵人合併計算）。</div>
+</div>
+
+<div class="share-modal hidden" id="shareModal">
+  <img id="shareImg" alt="便當人格分享圖">
+  <p id="shareHint">長按圖片即可儲存，分享到 IG 限動或 LINE</p>
+  <button class="btn btn-dark" style="max-width:300px" id="shareClose">關閉</button>
+</div>
+
+<script>
+// ===== 設定 =====
+const CONFIG = {
+  LIFF_ID: '2012181470-h5TPWzPZ',
+  API_URL: 'https://since9134.app.n8n.cloud/webhook/zmzm-game-result',
+  ORDER_URL: 'https://shop.ichefpos.com/store/j3LVSING/ordering?utm_source=bento_quiz&utm_medium=game&utm_campaign=bento_horoscope',
+  TEAM_URL: 'https://line.me/R/ti/p/@478bwqhr',
+  SITE_URL: 'https://game.baofucompany.com/quiz/',
+};
+const track = (name, params) => { try { gtag('event', name, params || {}); } catch (e) {} };
+
+// ===== 星座 =====
+const SIGNS = [
+  { k: 'aries', n: '牡羊座', d: '3/21–4/19' }, { k: 'taurus', n: '金牛座', d: '4/20–5/20' },
+  { k: 'gemini', n: '雙子座', d: '5/21–6/21' }, { k: 'cancer', n: '巨蟹座', d: '6/22–7/22' },
+  { k: 'leo', n: '獅子座', d: '7/23–8/22' }, { k: 'virgo', n: '處女座', d: '8/23–9/22' },
+  { k: 'libra', n: '天秤座', d: '9/23–10/23' }, { k: 'scorpio', n: '天蠍座', d: '10/24–11/22' },
+  { k: 'sagittarius', n: '射手座', d: '11/23–12/21' }, { k: 'capricorn', n: '摩羯座', d: '12/22–1/19' },
+  { k: 'aquarius', n: '水瓶座', d: '1/20–2/18' }, { k: 'pisces', n: '雙魚座', d: '2/19–3/20' },
+];
+
+// 12 星座 × 7 則運勢（原創文案，每天依日期輪替）
+const HORO = {
+  aries: ['衝勁十足的一天，事情推得動，記得中午先吃飽再開戰。', '今天適合先做最難的那件事，午餐吃點有份量的犒賞自己。', '有人會被你的行動力帶動，順手幫團隊點個餐吧。', '別急著一口氣做完，中午好好吃頓飯，下午效率更好。', '靈感突然冒出來，記下來就好，先去吃午餐。', '小小的挑戰今天特別順手，午餐試試沒吃過的口味。', '今天說話直一點反而有效，但吃飯時記得放鬆一下。'],
+  taurus: ['穩穩來就會有好結果，午餐選一道熟悉的安心味。', '今天適合好好照顧自己，吃頓不馬虎的午餐。', '工作節奏剛剛好，別讓忙碌偷走你的午餐時間。', '有點想偷懶？吃頓好的再出發，下午會順很多。', '今天適合精打細算，剛好用張折價券。', '身邊的人很依賴你，午餐揪大家一起吃吧。', '慢慢吃、細細嚐，今天的幸運藏在小確幸裡。'],
+  gemini: ['腦袋轉很快的一天，記得補充能量別空腹開會。', '今天聊天會聊出好點子，午餐找同事一起吃。', '事情一多容易分心，先把午餐決定好，少一件煩惱。', '好奇心爆發，午餐換個沒點過的口味試試。', '訊息很多，挑重要的回就好，中午好好休息。', '今天溝通特別順，適合約人吃飯談事情。', '變化是你的好朋友，菜單也可以換換新花樣。'],
+  cancer: ['今天特別需要被照顧，午餐選一道溫暖療癒的。', '家人或同事一句關心就能讓你充電，記得回應。', '情緒起伏時，先吃點東西再說，心情會好很多。', '適合整理身邊的小事，午餐吃清爽一點。', '你的貼心會被看見，順手幫大家點餐加分。', '今天適合待在舒服的步調，別逼自己太緊。', '安全感來自吃飽，午餐別隨便打發。'],
+  leo: ['今天是你的主場，午餐也要吃得體面一點。', '自信滿滿的一天，犒賞自己一份好料。', '有人會注意到你的努力，保持就對了。', '適合帶頭做決定，午餐也由你來揪團。', '今天氣場很強，記得吃飽才撐得住全場。', '小小的讚美能讓你整天好心情，也分享給別人吧。', '享受被注目的感覺，午餐選一道有存在感的主菜。'],
+  virgo: ['細節控的一天，事情做得又快又好，午餐吃均衡一點。', '今天適合把待辦清掉，中午別忘了休息。', '對自己好一點，不用每件事都完美。', '吃得乾淨清爽，下午腦袋會更清楚。', '計畫性滿分，順手把這週午餐也排好吧。', '今天的效率來自好好吃飯，別跳過午餐。', '小小的整理帶來大大的好運，桌面也清一下吧。'],
+  libra: ['平衡是今天的關鍵字，午餐葷素搭配剛剛好。', '人緣超好的一天，適合約同事一起吃飯。', '選擇困難時，交給測驗推薦就對了。', '今天適合處理需要溝通協調的事。', '美好的事物會讓你充電，午餐也挑好看的。', '別勉強自己討好所有人，先把自己餵飽。', '今天的好運來自身邊的人，記得說聲謝謝。'],
+  scorpio: ['專注力超強的一天，中午記得抬頭吃個飯。', '直覺很準，午餐想吃什麼就吃什麼。', '今天適合深入處理一件重要的事。', '別把情緒悶著，好好吃一頓會舒服很多。', '有人想靠近你，給點機會一起吃午餐吧。', '今天適合低調做事，成果自然會說話。', '能量需要補充，午餐選一道紮實的主菜。'],
+  sagittarius: ['想冒險的一天，午餐挑一道沒吃過的。', '心情很自由，適合換個地方吃午餐。', '今天的樂觀會感染身邊的人。', '新點子很多，先吃飽再一個一個試。', '別把行程排太滿，留點空間給好事發生。', '今天適合學新東西，也可以試新口味。', '遠方有好消息，午餐吃點特別的迎接它。'],
+  capricorn: ['目標明確的一天，事情推得很穩，午餐吃有力氣的。', '今天適合規劃長期的事，先把午餐顧好。', '責任感很重，記得也照顧一下自己。', '努力會被看見，今天值得犒賞自己。', '午餐別邊吃邊工作，好好休息十分鐘。', '穩紮穩打最適合你，吃熟悉的安心味吧。', '今天適合處理數字和計畫，腦袋需要能量。'],
+  aquarius: ['點子很多的一天，午餐也來點不一樣的。', '今天適合跟想法不同的人交流。', '你的獨特很吸引人，做自己就好。', '別被規則綁住，午餐想怎麼吃都可以。', '團隊合作會有驚喜，揪大家一起訂餐。', '今天適合嘗試新工具、新方法、新口味。', '自由的心需要飽足的胃，中午別隨便吃。'],
+  pisces: ['感受力很強的一天，午餐吃點療癒的。', '今天適合發揮創意，靈感會一直來。', '別太在意別人的眼光，先照顧自己。', '浪漫指數很高，午餐也選有質感的。', '有點累就慢下來，吃頓好的再出發。', '直覺會帶你找到好東西，包括今天的午餐。', '溫柔是你的超能力，順手幫同事點個餐吧。'],
+};
+const LUCKY_SIDES = ['特色米飯（紅藜麥）', '舒肥青醬嫩雞', '特調花生嫩雞', '南洋沙嗲嫩雞'];
+const LUCKY_COLORS = ['稻穗金', '森林綠', '奶茶色', '海軍藍', '暖橘色', '珍珠白', '酒紅色'];
+
+// ===== 便當人格 =====
+const PERSONAS = {
+  muscle:    { e: '💪', n: '戰鬥增肌派', d: '你是辦公室裡的行動派，今天需要扎實的蛋白質撐住整個下午。吃飽才有力氣打怪！', dishes: ['日式極厚切手工豬排', '法式香料烤雞腿'] },
+  fresh:     { e: '🌿', n: '清爽療癒派', d: '你需要的是輕盈又不空虛的一餐，讓身體和腦袋都保持清爽，下午才不會想睡。', dishes: ['舒肥嫩雞（青醬）', '薑汁照燒豆腐'] },
+  adventure: { e: '🧭', n: '冒險嚐鮮派', d: '一成不變不是你的風格，今天就讓味蕾去冒個險，換一道沒吃過的吧！', dishes: ['普羅旺斯炙烤鮮魷', '法式嫩煎玫瑰鴨胸'] },
+  classic:   { e: '🏠', n: '安心經典派', d: '熟悉的味道最療癒。今天不用想太多，點那道一吃就安心的經典口味。', dishes: ['江戶壽喜燒豬肉'] },
+  green:     { e: '🍄', n: '綠色永續派', d: '你在意身體，也在意地球。今天來份蔬食，搭配循環餐盒，吃得心安理得。', dishes: ['三杯杏鮑菇', '江戶壽喜燒菇菇'] },
+  treat:     { e: '👑', n: '犒賞自己派', d: '辛苦了！今天值得好好寵自己一下，點一道平常捨不得的好料吧。', dishes: ['炙燒板腱牛排'] },
+  ocean:     { e: '🐟', n: '海味能量派', d: '腦袋需要好油脂充電，今天來點海味，讓整天的會議都清醒有力。', dishes: ['鹽烤挪威鯖魚'] },
+  team:      { e: '🤝', n: '團聚分享派', d: '一個人吃不如一群人吃得開心。你天生是團隊的胃，今天就幫大家揪一桌吧！', dishes: ['多款主餐混搭團訂（企業訂餐可客製）'] },
+};
+const ORDER = ['green', 'ocean', 'adventure', 'treat', 'fresh', 'classic', 'muscle', 'team'];   // 同分時前面優先
+
+// ===== 題目 =====
+const QUESTIONS = [
+  { t: '你的星座是？', sign: true },
+  { t: '今天上班的狀態？', o: [
+    ['戰鬥力滿點', { muscle: 2, adventure: 1 }], ['只想躺平', { treat: 2, classic: 1 }],
+    ['有點焦慮', { green: 2, fresh: 1 }], ['期待下班', { ocean: 2, treat: 1 }] ] },
+  { t: '午餐最想要？', o: [
+    ['吃飽有力氣', { muscle: 2, classic: 1 }], ['清爽無負擔', { fresh: 2, green: 1 }],
+    ['來點特別的', { adventure: 2, treat: 1 }], ['熟悉的安心味', { classic: 2, ocean: 1 }] ] },
+  { t: '點餐時你通常？', o: [
+    ['挑沒吃過的', { adventure: 2 }], ['點最愛那道', { classic: 2, muscle: 1 }],
+    ['跟同事點一樣', { team: 1, fresh: 1 }], ['都好，但要好吃', { treat: 2, ocean: 1 }] ] },
+  { t: '今天的工作量？', o: [
+    ['爆炸', { muscle: 2, ocean: 1 }], ['正常', { green: 2, classic: 1 }],
+    ['輕鬆', { treat: 1, adventure: 1 }], ['整天開會', { ocean: 2, fresh: 1 }] ] },
+  { t: '今天最想跟誰吃？', o: [
+    ['自己安靜吃', { fresh: 2 }], ['隔壁同事', { classic: 1 }],
+    ['整個團隊', { team: 3 }], ['重要客戶', { team: 3 }] ], teamIdx: [2, 3] },
+];
+
+// ===== 工具 =====
+function twDate() {
+  const d = new Date(Date.now() + 8 * 3600e3);
+  return { ymd: d.toISOString().slice(0, 10), doy: Math.floor((d - Date.UTC(d.getUTCFullYear(), 0, 0)) / 864e5) };
+}
+const $ = id => document.getElementById(id);
+function show(id) { ['start', 'quiz', 'result'].forEach(s => $(s).classList.toggle('hidden', s !== id)); window.scrollTo(0, 0); }
+
+// ===== 測驗流程 =====
+let step = 0, sign = null, scores = {}, wantsTeam = false, result = null;
+
+function resetQuiz() { step = 0; sign = null; scores = {}; wantsTeam = false; result = null; }
+
+function renderQ() {
+  const q = QUESTIONS[step];
+  $('bar').style.width = (step / QUESTIONS.length * 100) + '%';
+  $('qno').textContent = 'Q' + (step + 1) + ' / ' + QUESTIONS.length;
+  $('qtitle').textContent = q.t;
+  const box = $('opts');
+  box.innerHTML = '';
+  box.className = 'opts' + (q.sign ? ' grid3' : '');
+  if (q.sign) {
+    SIGNS.forEach((s, i) => {
+      const b = document.createElement('button');
+      b.className = 'opt';
+      b.innerHTML = s.n + '<small>' + s.d + '</small>';
+      b.onclick = () => { sign = i; next(); };
+      box.appendChild(b);
+    });
+  } else {
+    q.o.forEach(([label, pts], idx) => {
+      const b = document.createElement('button');
+      b.className = 'opt';
+      b.textContent = label;
+      b.onclick = () => {
+        Object.entries(pts).forEach(([k, v]) => { scores[k] = (scores[k] || 0) + v; });
+        if (q.teamIdx && q.teamIdx.includes(idx)) wantsTeam = true;
+        next();
+      };
+      box.appendChild(b);
+    });
+  }
+}
+
+function next() {
+  step++;
+  if (step < QUESTIONS.length) renderQ(); else finish();
+}
+
+function finish() {
+  let best = ORDER[0], bestScore = -1;
+  ORDER.forEach(k => { const s = scores[k] || 0; if (s > bestScore) { best = k; bestScore = s; } });
+  const t = twDate();
+  const s = SIGNS[sign];
+  const idx = (t.doy + sign * 3) % 7;
+  result = {
+    persona: best, sign: s.k, signName: s.n,
+    horo: HORO[s.k][idx],
+    side: LUCKY_SIDES[(t.doy + sign) % LUCKY_SIDES.length],
+    color: LUCKY_COLORS[(t.doy * 2 + sign) % LUCKY_COLORS.length],
+    team: wantsTeam || best === 'team',
+  };
+  renderResult();
+  track('quiz_complete', { persona: best, sign: s.k });
+}
+
+function renderResult() {
+  const p = PERSONAS[result.persona];
+  $('rEmoji').textContent = p.e;
+  $('rName').textContent = p.n;
+  $('rDesc').textContent = p.d;
+  $('rDishes').innerHTML = '';
+  p.dishes.forEach(d => { const div = document.createElement('div'); div.className = 'dish'; div.textContent = '🍱 ' + d; $('rDishes').appendChild(div); });
+  $('horoTitle').textContent = result.signName + '｜今日運勢';
+  $('rHoro').textContent = result.horo;
+  $('rLucky').innerHTML = '';
+  ['幸運配菜：' + result.side, '幸運色：' + result.color].forEach(x => { const c = document.createElement('span'); c.className = 'chip'; c.textContent = x; $('rLucky').appendChild(c); });
+  $('teamBtn').classList.toggle('hidden', !result.team);
+  $('couponCode').textContent = '—';
+  setNote('');
+  $('claimBtn').classList.remove('hidden');
+  show('result');
+}
+
+function setNote(text, ok) { const n = $('couponNote'); n.textContent = text; n.className = 'note' + (ok ? ' ok' : ''); }
+
+// ===== LINE 登入與領券 =====
+let liffInited = false;
+async function initLiff() {
+  try {
+    await liff.init({ liffId: CONFIG.LIFF_ID });
+    liffInited = true;
+    if (liff.isLoggedIn()) resumePending();
+  } catch (e) { console.warn('LIFF 初始化失敗', e); }
+}
+function resumePending() {
+  let p = null;
+  try { p = JSON.parse(sessionStorage.getItem('pendingQuiz') || 'null'); } catch (e) {}
+  try { sessionStorage.removeItem('pendingQuiz'); } catch (e) {}
+  if (!p || Date.now() - p.ts > 15 * 60 * 1000 || p.ymd !== twDate().ymd) return;
+  result = p.result;
+  renderResult();
+  claim();
+}
+
+async function claim() {
+  if (!result) return;
+  if (!liffInited) { $('couponCode').textContent = '暫時無法領取'; setNote('LINE 登入元件載入失敗，請重新整理頁面再試'); return; }
+  if (!liff.isLoggedIn()) {
+    try { sessionStorage.setItem('pendingQuiz', JSON.stringify({ ts: Date.now(), ymd: twDate().ymd, result })); } catch (e) {}
+    $('couponCode').textContent = '前往登入…';
+    setNote('領券需要 LINE 登入，登入後會自動把折價券傳到你的 LINE');
+    setTimeout(() => liff.login({ redirectUri: location.href.split('#')[0] }), 1200);
+    return;
+  }
+  $('claimBtn').disabled = true;
+  $('couponCode').textContent = '領取中…';
+  try {
+    const r = await fetch(CONFIG.API_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken: liff.getIDToken(), source: 'quiz', persona: result.persona, personaName: PERSONAS[result.persona].n, sign: result.sign }),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (r.ok && data.status === 'ok') {
+      $('couponCode').textContent = data.code;
+      setNote('✅ 折價券已傳送至你的 LINE，結帳時輸入折扣碼即可使用', true);
+      $('claimBtn').classList.add('hidden');
+      track('coupon_claim', { source: 'quiz', persona: result.persona });
+    } else if (data.status === 'already_claimed') {
+      $('couponCode').textContent = '今日已領取';
+      setNote('每人每天限領一張（與粒粒獵人合併計算），今天的券已在你的 LINE 裡，明天再來！');
+      $('claimBtn').classList.add('hidden');
+    } else if (data.status === 'invalid_token') {
+      $('couponCode').textContent = '請重新登入';
+      setNote('登入逾時，請重新整理頁面後再領一次');
+    } else {
+      $('couponCode').textContent = '暫時無法領取';
+      setNote('系統忙碌中，請稍後再試，或私訊知己知米 LINE 官方帳號');
+    }
+  } catch (e) {
+    $('couponCode').textContent = '暫時無法領取';
+    setNote('網路連線不穩，請稍後再試');
+  } finally { $('claimBtn').disabled = false; }
+}
+
+function openUrl(url) {
+  if (liffInited && liff.isInClient()) liff.openWindow({ url, external: false });
+  else window.open(url, '_blank');
+}
+
+// ===== 分享圖卡（1080×1920）=====
+function wrapText(ctx, text, x, y, maxW, lh) {
+  let line = '';
+  for (const ch of text) {
+    if (ctx.measureText(line + ch).width > maxW && !'，。！？、；：）」'.includes(ch)) { ctx.fillText(line, x, y); line = ch; y += lh; }
+    else line += ch;
+  }
+  if (line) ctx.fillText(line, x, y);
+  return y + lh;
+}
+function makeShareImage() {
+  const p = PERSONAS[result.persona];
+  const c = document.createElement('canvas'); c.width = 1080; c.height = 1920;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0, 0, 0, 1920); g.addColorStop(0, '#14110c'); g.addColorStop(1, '#2a2318');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 1080, 1920);
+  ctx.strokeStyle = '#d9b45a'; ctx.lineWidth = 6; ctx.strokeRect(60, 60, 960, 1800);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#d9b45a'; ctx.font = '40px sans-serif'; ctx.fillText('RICEANDME｜知己知米', 540, 190);
+  ctx.fillStyle = '#f3e3b5'; ctx.font = 'bold 76px sans-serif'; ctx.fillText('我的今日便當人格', 540, 320);
+  ctx.font = '200px sans-serif'; ctx.fillText(p.e, 540, 600);
+  ctx.fillStyle = '#f6efe0'; ctx.font = 'bold 110px sans-serif'; ctx.fillText(p.n, 540, 780);
+  ctx.textAlign = 'left'; ctx.font = '46px sans-serif'; ctx.fillStyle = '#f6efe0';
+  let y = wrapText(ctx, p.d, 150, 900, 780, 70);
+  ctx.fillStyle = '#d9b45a'; ctx.font = 'bold 44px sans-serif'; ctx.fillText('🍱 今日推薦', 150, y + 40);
+  ctx.fillStyle = '#f6efe0'; ctx.font = '46px sans-serif';
+  y += 120; p.dishes.forEach(d => { y = wrapText(ctx, '・' + d, 150, y, 780, 64); });
+  ctx.fillStyle = '#d9b45a'; ctx.font = 'bold 44px sans-serif'; ctx.fillText('🔮 ' + result.signName + '今日運勢', 150, y + 40);
+  ctx.fillStyle = '#f6efe0'; ctx.font = '44px sans-serif';
+  y = wrapText(ctx, result.horo, 150, y + 120, 780, 64);
+  ctx.textAlign = 'center'; ctx.fillStyle = '#b9ad94'; ctx.font = '38px sans-serif';
+  ctx.fillText('測你的便當人格 → game.baofucompany.com/quiz', 540, 1760);
+  return c;
+}
+async function share() {
+  track('share_click', { persona: result.persona });
+  const canvas = makeShareImage();
+  const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+  const file = new File([blob], 'bento-persona.png', { type: 'image/png' });
+  const text = '我的今日便當人格是「' + PERSONAS[result.persona].n + '」！你是哪一型？測完還送知己知米折價券 👉 ' + CONFIG.SITE_URL;
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], text }); return; } catch (e) { if (e.name === 'AbortError') return; }
+  }
+  $('shareImg').src = URL.createObjectURL(blob);
+  $('shareModal').classList.remove('hidden');
+}
+
+// ===== 綁定 =====
+$('startBtn').onclick = () => { resetQuiz(); show('quiz'); renderQ(); track('quiz_start'); };
+$('claimBtn').onclick = claim;
+$('orderBtn').onclick = () => { track('order_click', { persona: result && result.persona }); openUrl(CONFIG.ORDER_URL); };
+$('teamBtn').onclick = () => { track('team_click', { persona: result && result.persona }); openUrl(CONFIG.TEAM_URL); };
+$('shareBtn').onclick = share;
+$('againBtn').onclick = () => { resetQuiz(); show('start'); };
+$('shareClose').onclick = () => $('shareModal').classList.add('hidden');
+initLiff();
+</script>
+</body>
+</html>
+
